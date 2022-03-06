@@ -1,0 +1,902 @@
+________General Install and Configuration for Git Windows________
+
+Git for Windows: Configuration 
+(in Git Bash)
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+
+Notepad++ Configuration:
+(in Git Bash)
+notepad++ ~/.bash_profile
+(in .bash_profile)
+alias npp='notepad++ -multiInst -nosession'
+
+Notepad++ Git Integration:
+git config --global core.editor "notepad++ -multiInst -nosession"
+
+(test git integration)
+git config --global -e
+
+P4Merge for Windows
+. Visual Compare and Merge Tool
+. Command Line Merging is Annoying
+. Optional but highly recommended
+Helix Visual Merge Tool (P4Merge)
+
+P4Merge Git Integration
+(P4Merge as Diff Tool comparison)
+(in Git Bash)
+git config --global diff.tool p4merge
+git config --global difftool.p4merge.path "C:/Program Files/Perforce/p4merge.exe"
+git config --global difftool.prompt false
+(P4Merge as Merge Tool)
+(in Git Bash)
+git config --global merge.tool p4merge
+git config --global mergetool.p4merge.path "C:/Program Files/Perforce/p4merge.exe"
+git config --global mergetool.prompt false
+
+//if these dont work, some systems might require more UNIX friendly syntax where C: --> /c/
+
+//To list all global configurations
+git config --global --list 
+------------------------------------------------------------------------------------------------
+________Comparing Git with Other SCM Tools________
+. Not the only (or best -- for some) choice.
+. Popular / De-facto standard
+. Very powerful
+. Commercial alternatives? Questionable..
+. Worth Serious Consideration
+
+Source Control Approaches
+. Centralized
+. Decentralized (Distributed)
+
+Distributed SCM
+. Modern Approach of Source Control
+. Offline / Detached Access (Everyone has a copy of the repository)
+. Fault-Tolerant / No Single Point of Failure
+
+Centralized SCM
+. Tied to Network / Online Access Only
+. Not as Fast (Latency)
+. Central Place of Truth (Single Point of Failure)
+. Distributed SCMs -- Can Act Centralized (if needed)
+
+Git vs Commercial
+Pros:
+. Nicer UI's
+Cons:
+. UI lock-in (Git = UI Choice)
+
+Git vs Mercurial
+. Mercurial
+	. Viable Alternative to Git
+	. Distributed (like Git)
+	. History is Sacred (unlike Git)
+	. Lack of Third Party Support (IDE, tools)
+
+Git Weaknesses
+. Same Distributed Problems
+. Large File Support / Binaries
+	. Duplicated with Each Version
+	. Replicated on Each Repo
+	. No Native Support Yet
+	. Exclude -- if Possible.
+
+Git Community
+. Simply Huge (Which is important!)
+. Finding Existing Developers
+. Answers to Questions
+. Websites/Tutorials/Courses
+. Future Team Members -- Git Experienced
+------------------------------------------------------------------------------------------------
+________The Basics_________
+
+Starting a new Git Repository:
+git init name
+
+Git States:
+Working directory, Staging Area, Git Repository or commmit history (.git folder)
+. 1) Working Directory contains all of the files and folders of the application (which may or may not be 
+     managed by Git, but it is still aware of the files)
+. 2) Staging Area is used to prepare for the next commit; files are movved from modified working directory 
+     state to the Git staging area, and then committed to the Git Repo.
+. 3) Git Repository, or the commit history, contains all the commmitted or saved changes to the Git Repo.
+. 4?)Remote State (which is just another repo with its own 3 states) can be considered a 4th state due to 
+     most people not considering something truly saved until it is saved or shared on a remote server.
+
+First Commit:
+. To check status of repo
+  git status
+. Creating the first file:
+  notepad++ README.md
+  //.md stands for markdown which is popular for git repositories.
+. Now using (git status)..
+  shows README.md is an Untracked File
+. Now we..
+  git add README.md
+  //this moves the file from the working directory state into the staging area state
+. Now if we use (git status) again..
+  shows -- new file: README.md
+. Now we commit..
+  git commit -m "First file in demo repo"
+. It now shows that we have a root-commit
+. Now if we (git status), it will show that there is nothing to commit.
+
+. The /projects/demo folder is the working directory of the Git repo. The actual Git repo is contained within the .git folder
+. If you delete .git folder with (rm -rf), then if you use (git status), it will say that you are no longer in a git repository.
+
+Adding Git Source Control to an Existing Folder:
+git init . //init current folder
+
+git add . //adds all files in current folder to the git staging area
+
+git log //shows all commits with unique IDs
+
+git show //last commit and a diff containing all the changes
+
+
+Editing an existing file being managed by Git:
+notepad++ readme.md
+
+git commit -a     //express commit adds modified files to the git staging area and then directly procede to committing
+git commit -am "" //previous plus adds commit message
+
+
+Backing Out Changes:
+//edit README.md
+git add .  //add modified file README.md
+git status //show staging area
+git reset HEAD README.md
+git checkout -- README.md 
+
+
+
+History and Git Alias Commands:
+git help log
+git log --oneline --graph --decorate --all
+git config --global alias.hist "log --oneline --graph --decorate --all"
+git config --global --list
+
+git hist
+git hist --LICENSE.md
+
+
+Rename and Delete Files:
+git mv example.txt demo.txt //rename file (can be done during staging area before committing)
+git commit -m "renaming example"
+git rm demo.txt 
+git commit -m "deleting demo.txt"
+git status
+git log
+
+git add -A //to include both deletions and insertions (all modifications)
+
+Excluding Unwanted Files/Folders in Repository:
+notepad++ .gitignore
+------------------------------------------------------------------------------------------------
+__Advanced Topics of Git__
+
+Comparing file differences with 'diff' command:
+git hist //use newly created alias to see history of commits
+git diff d444e90 HEAD //difference between the HEAD (special pointer signifying last commit of current branch -- which is main) and the specific commit
+
+Using difftool command instead:
+git difftool d444e90 HEAD //will launch configured difftool (p4merge)
+
+Branching and Merge Types:
+. Branch = Timeline of Commits
+. Branch Names are Labels
+	. Deletion removes label only!!
+Ex. Can have a 'Master Branch', and later branch-off into a 'Feature Branch' before possibly rejoining again at another time
+	. 		  / -o--Feature-o--
+	. -o--o-Master--------
+
+Types of Merges:
+. Fast-Forward
+	. Simplest case
+	. Like never branched (Commits on Destination)
+	. Can be disabled
+	. In the case of branching off to the feature branch at first, you'll now have something like this:
+		. Ex. --o-Master-o--|o-Feature-o|-o-Master-o-   (Whole thing is the new singular master)
+. Automatic
+	. Non-conflicting merge detected
+	. Preserves both Timelines
+	. Merge Commit on Destination
+		. 		  / --o-Feature-o--\
+		. -o----Master----o---------o------o---
+									^automatic merge commit
+. Manual
+	. Automatic Merge not Possible
+	. Conflicting Merge State
+	. Changes Saved in Merge Commit
+		. 		  / --o-Feature-o--\
+		. -o----Master----o---------o------o---
+									^manual merge commit
+									
+Special Markers: (HEAD and friends)
+. Like 'pointers'
+. HEAD
+	. Points to Last Commit of Current Branch
+	. Can be Moved (advanced)
+
+Simple Branching Example:
+//git checkout <branchname> //to switch between existing branches
+
+git branch //shows current branch is main
+git checkout -b updates //name of branch you wish to create
+	. This creates AND switches to the new branch
+	. Since there were modifications pending in the working directory, it carried them forward to the new branch
+		. This is a technique that can be used when you start working in Main and before committing, knowing these changes should be isolated in their own feature branch
+notepad++ README.md
+git add .
+git commit -m "Adding updates from branch"
+git hist //now shows different progress for diff branches
+git diff updates main //compare differences of branches
+
+git checkout main //switch back to main branch
+//Now to merge the changes
+git merge updates //merges into the current branch (fast-forwards)
+git hist //HEAD, updates and main all point to the same commit id (FF merge)
+
+//to remove the branch when its no longer needed (only label deletes, not the history)
+git branch -d updates //name of branch
+
+Conflict Resolution:
+notepad++ README.md
+git checkout -b very-bad
+git branch -a
+notepad++ README.md //changing to cause a conflict (updating the same part of the file on both branches)
+git commit -am "very bad update"
+git hist
+git checkout master
+notepad++ README.md //changing to cause another conflict (updating the same part of the file on both branches)
+git commit -am "causing issues again"
+git branch -a //show all branches
+git merge very-bad main 
+//Auto-merge failed -- merge conflict
+cat README.md  //shows <<<<<< HEAD and >>>>>>>> very-bad
+git mergetool    //shows a 3-way merge conflict (p4merge)
+// Can use p4merge tool to solve conflicts, and save&quit
+// to complete the merge, you must commit now
+git commit -m "resolving conflict"
+git status //now there's a .orig file (README.md.orig)
+//add .orig files to .gitignore
+git commit -am "updating ignore to exclude merge files"
+rm README.md.orig
+
+Marking Special Events with Tagging:
+//First we want to mark this point in the repo with a "milestone" since we've been working on it for awhile
+git tag mytag //if you don't specify itll default to the current
+git tag --list
+git hist
+git tag -d mytag //delete mytag
+git tag -a v1.0 -m "Release 1.0"
+git tag --list //won't show annotated tags
+git show v1.0 //this will
+
+
+Git Stashing: (Saving temporary changes)
+notepad++ README.md //modify
+//now we decided that we might have not wanted to do that yet, and this shouldve been done on a branch or changing context
+//use git stashing ability
+git stash //HEAD was saved (last commit on current branch main)
+git stash list //shows stashes 
+git status
+notepad++ LICENSE.txt
+git commit -am "updating license file"
+git stash pop //does both: apply (apply whatever last stash is) and drop (drop stash that was applied)
+git stash list //no results
+
+Time Travel with Reset and Reflog:
+git status
+notepad++ README.md
+git add .
+git status
+notepad++ README.md //modify again after already added to staging area. It'll show diff modifications in staging area/working directory
+git hist
+git reset 8a2a5eb --soft //soft reset (least destructive. change where head is pointing & preserves staging area/working directory), 
+						 //mixed (default) reset (unstages changes and places in working directory), 
+						 //hard reset (most destructive)
+git hist
+git log --oneline 	//doesnt show full list, only commit ID's
+git reflog 			//shows all actions taken while in repository
+git reset --hard 8a2a5eb
+------------------------------------------------------------------------------------------------
+__GitHub Topics__
+
+Linking a Local Git Repository to GitHub:
+git remote -v //view remote connections (originally shows none)
+git remote add origin https://github.com/ommoore/STM32CustomBootloader.git //origin is the name for the remote repo
+git remote -v //now shows the same github directory for both (fetch) and (push)
+
+Pushing Changes to GitHub:
+git push -u origin main --tags 	//origin = name of remote repo, main = branch
+
+
+SSH Authentication:
+. Currently we are using HTTPS
+. Popular when using a personal computer or one commonly used because it saves time
+
+HTTPS vs SSH:
+. When using a 'push', it will prompt you for username & password (possibly multiple times)
+. SSH can bypass this with a unique SSH key
+
+Generating an SSH Key:
+. Create SSH directory: 
+mkdir .ssh
+ssh-keygen -t rsa -C "ommoore@ieee.org" //type rsa, Common name
+//generates public and private keys
+ssh -T git@github.com
+
+
+//When you want to delete the first commit, you have to instead delete the branch you are on.
+git update-ref -d HEAD
+
+GitHub Repository:
+
+Creating a Local Copy with Clone:
+options: HTTPS or SSH or Subversion
+git clone git@github.com:ommoore/my-website.git website
+
+Seeding the Repository with Sample Content:
+www.initializr.com   
+Bootstrap -> Download
+
+cp -R ~/Downloads/initializr/* .  //copy all contents of the initializr folder in Users/Downloads/ into . current directory (website repository)
+
+git add .
+git commit -m "adding initial website files"
+git push origin main 
+
+Publish Back to GitHub:
+
+git push //default behavior (depends on version of git)
+git version
+git config --global push.default simple
+
+Fetch and Pull:
+//First we will do an edit on the GitHub repository from the browser.
+//-> index.html file
+//edit file
+//change to <title>My Website</title>   on line 9
+//Now leave a commit message at the bottom: ""
+Now we have made a change on the remote repo that our local repo has no knowledge of.
+git status //will show everything as "up to date" which is incorrect
+//Now if you make a local repo change (modify file) and attempt to push to remote repo...
+//It will return a failure because the remote repo is ahead by 1 or more commits.
+//Your branch and 'origin/main' have diverged
+//This will occur if multiple users are pushing to the same repo. You will need to manually merge then push the new changes separately after catching up.
+
+Fetches are NON-DESTRUCTIVE
+
+git fetch 
+//this will see that both repo's have diverged and have 1 or more different commits each. It suggests using git pull to merge the remote branch into yours.
+git pull
+
+always pull before pushing if working with many people.
+
+
+Updating Repository and Remote References:
+//after changing 'my-website' to 'website', the references to origin need to be updated..
+git remote -v //still points to my-website
+git remote set-url origin git@github.com:ommoore/website.git
+git remote -v //now points to website
+
+git remote show origin
+
+Creating New File from Remote Repo on separate branch (feature branch):
+//created lorem ipsum sample text file directly on github
+//added it to different branch then main (feature-lipsum)
+//filled out comment for merge request (as we would do if working in a group)
+//since no one else is collaborating, I accept my own merge pull request as there are no conflicts when merging (feature-lipsum) branch and (main) branch
+//pull request successfully merged and closed
+
+Creating New File on Remote Repo on Main branch:
+//more streamlined, same process with less steps.
+
+Synchronizing our Changes with our Local Repository (Local Sync):
+git status //shows 'up to date'
+git fetch  //updates references from github
+git status //now your branch is behind by x commits of origin main
+git pull   //fast-foward as suggested 
+
+
+Commit Details:
+//Within the commit history, you can access a specific commit by clicking on the abbreviated SHA-1 link.
+//In the specific commit, itll say how many insertions/deletions occured between the parent commit and this one.
+//If you click on the + on a specific line, you can create/delete an in-line comment with markdown commands meant for code review.
+//You can also leave a comment on the entire commit itself.
+//You can also view the history of commits that modified a given file.
+
+GitHub Time Travel: Reviewing your Repo as of a Particular Commit:
+//Click on the angle brackets <> on a specific commit in the commit history, then click browse files to browse the Repo at a specific commit in its history.
+//"Tree: 7a8dcf233b" will show the commit ID we're browsing.
+//We can return to the regular view of the Repo, where all of the commits are shown, by clicking on tree/branch drop-down menu and returning to "main"
+
+Using Commit IDs with the Local Repository:
+//Click on "Copy the full SHA" commit ID icon
+//go to local repo
+pwd
+git status
+git pull //make sure everythings in sync first
+git show e6acef6c1d09e9dfef4c659e8ffc59000015368c
+
+------------------------------------------------------------------------------------------------
+
+GitHub Repository Branches:
+. Created example branch on github website repository
+	. Made changes in readme file from example branch, then went back to main branch by clicking on the link to Website's main repo page.
+	. Now the repo on main branch shows: "example had recent pushes less than a minute ago. Compare and Pull Request" 
+	
+. Created branch locally then later push to GitHub: (typical usage)
+	git checkout -b 'remove-ipsum'
+	ls -l
+	git rm lipsum.txt
+	git status
+	git commit -m "Removing ipsum file"
+	//Now when we go to GitHub, the local 'remove-ipsum' branch isnt found, but Main and Example branches are still there.
+	//Now to push the local branch to GitHub..
+	git push -u origin remove-ipsum
+
+. Merging Locally:
+git status
+git checkout main
+git pull
+git merge remove-ipsum
+git status
+git push
+git status
+
+//after merging locally, on the GitHub website it will still show the previous branch that was merged -- but this is essentially the leftover copy, 
+//as the main branch has been already updated post-merge. Delete the old branch from GitHub (with option to restore until page refresh/navigation)
+
+//now locally
+git branch -a
+//shows the old local remove-ipsum branch.
+git branch -d remove-ipsum //it would warn us if the changes of this branch weren't reflected in main --which it didnt because we are up to date.
+
+//we still have the stale remove-ipsum reference to origin 
+git fetch -p //prune option to remove dead branches
+
+git branch -a //now its clean
+
+. Locally Switch to a Branch on GitHub
+//Create new branch on GitHub and then checkout that particular branch on a local system
+created 'update-readme' branch on GitHub
+//Now we want to create more changes from our local system before merging
+git fetch
+git branch -a
+git checkout update-readme //this only works if you only have a single remote repository  -- otherwise you would have to take another approach
+git branch -a //will now show the new local branch in green text
+npp README.md //make an edit
+git commit -am "More tweaks to README"
+git push //will automatically push to the update-readme branch based on context. check on GitHub
+
+. Cleaning up by Deleting Branches and References
+git config --global -e //push set to 'simple' by default but can be overridden
+git pull --all //update all tracking branches at the same time
+git merge update-readme
+git push
+git branch -a
+git branch -d update-readme
+//now to delete remote branch and references
+git push origin :update-readme //the colon signifies a deletion of the branch listed afterwards
+//remote references were automatically handled as well, so no need for a git fetch with pruning option
+
+. Pull with Rebase:
+//first made remote changes to README file on GitHub
+//next made local changes to index.html before git pull
+npp index.html
+git commit -am "Updating index.html before rebase"
+
+git fetch //manual, longer way. Update local Git from Remote side.
+//branch and origin/main have diverged (1 different commit each)
+
+git status
+//could just merge in now (automatic merge would just result in a merge commit), but..
+
+//if you want to make sure that whatever you're currently working on stays ahead of what's on GitHub
+git pull --rebase //rebase instead of merge
+//First rewinding local branch (rewinding head to replay your work on top of it..)
+//Then brings in changes from GitHub
+//Applying: Updating index.html locally before rebase (applies any commits we had on the local branch)
+git hist 
+git status //ahead by one commit
+npp README.md //changes from remote are already updated locally
+git push //what we have locally already includes what was recently changed on GitHub (from rebase), so now all that's being pushed are the changes we made locally
+
+. GitHub Graphs
+git log --oneline --graph
+//or from GitHub, go to Insights > Network to view graph of repo's merge/push history 
+
+. Setting the Default Branch:
+//on GitHub
+//Active development should not happen on the Master/Main branch directly, it should happen on separate development branches which will then periodically be merged to Main.
+//To change default branch, go to settings on GitHub and then under branches, change to a new default branch.
+//Changing default branch can have unintended consequences regarding merging, pushing and pulling.
+//Made a change under a new branch 'just-a-demo' by editing and committing README file.
+//		New compare & pull request detected, now there is the option to merge 'just-a-demo' with either 'develop' branch (new default) and 'main' (old default)
+//Deleted, 'just-a-demo' without merging.
+//Now copying SSH clone URL to Repo (with new default branch), but first we have to delete our local repo (ie. 'Main' branch), before recloning from our new default branch ('develop')
+rm -rf website
+git clone git@github.com:ommoore/website.git
+//The default branch after cloning a repository from GitHub will use the default branch that was set on GitHub (remotes/origin/develop)
+//our local repository actually does not have a master/main branch anymore, we would have to checkout that branch specifically now from GitHub since 'develop' is the new default branch
+git branch -a
+git checkout main	//pulls and switches to main branch from remote (since it exists there but not on local)
+git branch -a 	 	//now main is a local branch, but 'develop' is still the default branch on GitHub 
+
+. Pull Conflicts and How to Solve Them
+//conflict between our local and remote repositories
+//switching back to local 'develop' branch
+git checkout develop
+git fetch 
+git status //branch is behind by 1 commit and can be fast-forwarded with 'git pull'
+//before that, we are going to edit the README file locally which will cause a conflict with fast-forwarding
+npp README.md //made changes
+git commit -am "Updating README with malice on local side"
+git status //your branch and origin/develop have diverged. both have 1 different commit each.
+//trying pull
+git pull //combination of fetch + merge targeting the remote branch -> results in merge conflict
+//resolve by modifying files directly or using a merge tool
+//using merge tool... (Perforce Helix Merge)
+git mergetool  //merging README
+git commit -m "resolving conflict with unique approach"  //[develop 63fe642] resolving conflict with unique approach
+git status //local branch is ahead of remote by 2 commits. untracked file: README.md.orig 
+rm *.orig //get rid of original files
+git status
+git push
+
+------------------------------------------------------------------------------------------------
+GitHub Tags and Releases
+
+. Overview
+// used to mark project milestones or events. Often forgotten but awesome.
+// Release Notes on GitHub
+
+. Local Tags
+git log --oneline
+git tag  //with no parameter by default shows any tags created (if available). It's empty for now.
+//creating tag named 'unstable', referencing the HEAD position (last commit) on the current branch (develop)
+git tag unstable develop //name of tag (unstable). reference point --last commit on the develop branch.
+git tag stable main
+git tag  //to view list of tags
+git hist //to view tags on merge history
+git log --oneline
+git tag -a v0.1-alpha -m "Release 0.1 (Alpha)" df04614
+git tag
+git show v0.1-alpha
+git log --oneline
+git tag -a v0.2-alpha -m "Release 0.2 (Alpha)" b8dd502
+git tag -a v0.3-alpha -m "Release 0.3 (Alpha)" e6acef6
+git tag -a v0.4-beta -m "Release 0.4 (Beta)" 0ab30b9
+
+. Pushing Tags to GitHub
+git pull //already up to date
+git push //everything up to date
+//everythings up to date, but GitHub doesnt show the new tags that were made, so..
+git push origin stable //to push individual tag
+git push --tags //to push all tags
+
+. Deleting Tags
+//Deleting from Remote first
+//If you delete v0.1-alpha tag on GitHub (remote), it will still exist on your local repo.
+git fetch -p
+git tag -d v0.1-alpha //delete remnant tag
+
+//Deleting from Local first
+git tag -d v0.2-alpha //now we decide we don't need v0.2-alpha either but we'll delete it first from local side
+git push origin :v0.2-alpha //to push nothing (i.e. delete) tag to remote 
+
+. Updating Tags (The Floating Tag)
+//How to update existing tags to point to a new commit then update GitHub to reflect that
+//Using unstable tag on GitHub (pointing at latest commit of branch), we will add more commits and then move this tag to point to the new latest commit ID.
+git status
+npp README.md
+git status
+git commit -am "Updating README purpose section"
+git push
+git log --oneline --decorate //Now we see the new commit where HEAD is pointing to (updating README purpose section) but tag:unstable still pointing to the previous commit.
+git tag -f unstable 61fe93e  //to move tag use the -f flag for git tag and provide new commit ID to point to (or if last arg left blank, it will assume the new HEAD as the commit ID to use)
+
+git push
+git pull
+git push origin develop
+//now if we check GitHub, unstable STILL points to the old location after pushing. If we go to the unstable tag page, it says develop is ahead by 1 commit since this tag
+//if we do..
+git push origin unstable //it will say rejected, unstable already exists -- failed to push ref.
+//can delete unstable tag on GitHub, re-push, and replace the tag with a new location, or...
+git push --force origin unstable  //push with --force (forced update)
+//In general, be careful with this because it can cause a lot of people grief since repositories are DISTRIBUTED. There are only a few cases where you would want to update tags that were already on GitHub
+
+. Starting a Release on GitHub
+//At first glance, Releases and Tag's tabs on GitHub have the same tag information with a slightly different display. So what's the difference? (Actually only true on older version of GitHub)
+//On the Tag's tab, it shows an option for Release Notes (which is where the distinction comes into play). (Actually only true on older version of GitHub)
+//If you click on the specific tag "ex. v0.4-beta" and select "Create release from tag", you can set a Release Title and Description to the existing tag, and also select if it should be a pre-release (non-production ready) or not.
+//Can "auto-generate release notes" too and add files / attach binaries.
+
+Markdown Syntax:
+
+## Release 0.3 BETA //2nd level header
+
+* Added initial website files
+
+### Pull Requests //3rd level header
+
+* PR #1	//referencing pull request 1
+* PR #2 //referencing pull request 2
+
+//checked pre-release box because of BETA
+//Now release tab will show releases (associated with respective tags). Can make edits to previous release notes here as well.
+
+. Deleting a Release
+//If you delete a release, it does not mean you are deleting the underlying tag associated with it.
+
+. Creating a Completely New Release
+//'Draft a New Release' -> Can create a new tag or use an existing one from here && choose appropriate branch.
+//Created Tag: "v1.0" in Target: Main (branch)
+//Release named:  Release 1.0
+
+# Release 1.0
+This release includes all of the previous work on __main__ branch up until this point.
+
+//Did not check "This is a pre-release" this time.
+
+//Now GitHub has created the Tag and associated Release notes for Release 1.0. There is also now a green label that states "Latest Release" next to release v1.0 in the releases tab.
+
+git checkout main
+git tag //shows 
+git pull
+git tag
+git show v1.0
+//GitHub will create "lightweight" tags when creating them through the GitHub interface as seen in the output after doing 'git show v1.0'
+
+------------------------------------------------------------------------------------------------
+
+Comparing Differences:
+
+//Comparing between branches, tags, and commits
+//Part of the Pull Request Process (except we dont proceed with pulling for this case)
+
+. Comparing with Pull Requests
+//If we go to the Pull Request page on GitHub, we can create a New Pull Request directly.
+//Comparing base:main with compare:develop shows a difference of 10 commits, and 1 file changed with details below.
+//You can click on any specific commit ID to see the individual changes, or at the bottom view a split or unified diff of every changed file.
+
+. Comparing Commits
+//On the commit history page on GitHub..
+//Clicking on any of the commits will show diffs of changed files. You can add code-level comments as well as commit-level comments here.
+//Made 2 code-level comments, and 1 commit-level comment.
+//Back on the commit page, it shows that comments are associated with this commit now. Now copy the SHA-1 key to clipboard
+//Now we'll use the pull request page to actually do our comparison.. 
+//New Pull Request..  base:main compare:8f5bf8108b06948958cdc7ce782c7d30c691be3b  (SHA-1 key from earlier)
+//You can input any branch, tag, commit, or history marker for the compare:______ field to compare with base:_______
+//When using the Pull Request mechanism to compare against a specific commit or tag (that doesn't qualify as something that can be pull requested), it will only compare.
+//The ability to do a Pull Request only happens when you are comparing branches.
+
+. Comparing Tags
+//Under the Releases tab, look for the Compare button with dropdown menu.
+//base:main  compare:unstable   (10 commits, 1 file change, 3 comments, 2 contributors)
+//same steps as the previous using the pull request mechanism UI.
+//Can compare branches with tags, or tags with tags.
+
+. Advanced Comparing
+//Pull request, new pull request
+//"Compare and review just about anything. Branches, tags, commit ranges, and time ranges. In the same repository and across forks."
+//Ex. Compare HEAD of develop, with "3 days ago on develop"
+//base: develop@{1day}  or develop@{3days}   //relative days ago
+//base: main@{2021-10-26}   compare:unstable //specific date 
+//base: HEAD@{3}   							 //relative position to head (3 commits prior)
+//base: stable  ... compare: HEAD^			 //HEAD minus 1 commit
+
+------------------------------------------------------------------------------------------------
+
+Social Coding:
+. Major part of GitHub (collaborating)
+. Join Projects with Forking
+. Contribute Back using Pull Requests
+. Review / Accept Pull Requests
+. Synchronize our Project Copy
+
+. Copying a GitHub repository by Forking
+//Forked a copy of 'scm-ninja/starter-web' repository to personal space on GitHub.
+
+. Creating a Branch on Your Fork
+//go to projects directory and..
+git clone git@github.com:ommoore/starter-web.git
+cd starter-web
+git status
+git checkout -b feature-readme //checkout: create and switch to feature-readme branch
+npp README.md
+git add README.md
+git commit -m "Editing README.md"
+git push -u origin feature-readme
+
+. Pull Request to Contribute our Changes to the Upstream Repository
+Go to feature-readme branch and click on "contribute changes to upstream repository -- create a pull request"
+base repo: scm-ninja/starter-web  base: master   <-   head repo: ommoore/starter-web  compare: feature-readme
+//This will now take you to the upstream repository scm-ninja/starter-web where it will show the pull request status (as open) and a pull request #
+
+. Update Pull Request
+//Have the ability to make comments, resolve issues, create labels, create milestones, assign to someone else on project, or adding more commits to pull request.
+//To keep adding more commits to this pull request, just add more commits to the underlying feature branch involved with this pull request.
+//The pull request page on GitHub will be automatically updated with the new commit and determined if merge conflicts exist.
+
+. Accepting the Pull Request
+//Need to have Write privileges on the other repository in order to accept the pull request (if no merge conflicts exist)
+//Pull request will eventually say "merged" and closed
+//Now the feature-readme branch can be deleted since the contents are now merged into main/master
+
+. GitHub Graphs
+
+. Synchronize Changes back to Your Fork
+git checkout master
+//we want to synchronize our upstream repo which we forked, to our individual copy of the repository
+//"Fetch upstream" -> Fetch and Merge located on ommoore/starter-web (master)
+//or manually from local terminal
+git remote -v  //shows origin location for fetch and push. can add more
+git remote add upstream git@github.com:scm-ninja/starter-web.git //add upstream to remote
+git remote -v  //99% of time fetch and push pointers will be identical, but its possible for them to differ.
+git pull upstream master  //pull from upstream master branch (sync with upstream)
+git push origin master	//push to origin master branch (push to forked repo)
+git branch -a
+git branch -d feature-readme //once pull request has been accepted, and merge has completed to upstream, and all changes are synced to master branch on forked repo.
+//git would complain if there were unmerged changes on branch thats being deleted.
+//local reference to remote branch still exists however    remotes/origin/feature-readme
+git fetch -p     //fetch with prune option which will get rid of local references leftover after merge/deletion
+
+. Enlisting Help with Collaborators
+
+------------------------------------------------------------------------------------------------
+
+GitHub Issues
+
+. Issue Tracking
+	. Built-In Issue Tracking
+		. GitHub Issues
+	. Basic Functionality, Enough for Most
+	. Labels / Milestones
+	
+//Whenever we create a pull request, an issue is created linked to the associated pull request.
+
+. Issue Labels
+Bug - Something isn't working
+Documentation - Improvements or additions to documentation
+Duplicate - This issue or pull request already exists
+Enhancement - New feature or request
+Good First Issue - Good for newcomers
+Help Wanted - Extra attention is needed
+Invalid - This doesn't seem right
+Question - Further information is requested
+Wontfix - This will not be worked on
+
+Can also add "New Labels" if these do not suffice, or edit/delete the existing ones.
+
+. Milestones
+Create New Milestone:
+	Add a Title, Description and Due Date (optional) to help organize your issues and pull requests.
+	Can edit, close, or delete Milestones.
+	Milestones will track deadlines and let you know if it is past-due
+
+. Issues
+	Created new issue titled: "Add Getting Started section to README" 
+	Added a description with markdown syntax, and assigned myself to issue, and assigned the "Enhancement" label and "Beta 1" milestone to the issue.
+	Even though this was the first issue created, it shows as Issue #3. This is because Pull Requests on the repository are also treated as issues.
+	Edited README file and added a Getting Started section. Committed changes after.
+	Now back in the Issues tab, I added a comment "Added a **Getting Started** section to the README file", then selected 'Close with comment' since the issue is now resolved.
+	Additional comments can be made even after the issue has been closed, and the issue can also be reopened if needed.
+	
+	. Associating Issues with Commits
+	Created a new issue called "Exclude Mac OS temp files from repo", added 'bug' label, assigned myself, and assigned it to Milestone 'Beta 1'
+	//In terminal, working in /website/ directory
+	git checkout develop  //switch from main to develop branch
+	
+	npp .gitignore
+	//added these lines to lines 9-10
+	# Mac OS temp files
+	.DS_Store
+	
+	git add .gitignore
+	git commit -m "Ignore Mac OS temp files, close #4"  //signifies that issue #4 is completed and actually signals GitHub to close this issue.
+	git push
+	
+	//Now on the GitHub issues page, go to the Excluding MacOS temp files from repo #4 issue
+	//It now shows this issue was closed in commmit dca48a6
+	
+	. Using Mentions with Issues
+	//Currently there is no commit associated to issue #3 (Adding Getting Started section to README)
+	//Under the commits page on the website repo, find that specific commit
+	//The easiest way to do this, is to click on the commit and go to the comment section and mention the issue there.
+	'Associating with #3 with this commit.'
+	//Now check to see if it worked. Go back to Closed Issues and click on #3
+	//The association/reference to that particular commit is now there: e4d6100
+	//If you have multiple commits involved, you do not need to use 'closed' to close the issue. You can reference the issue ID without closing it, and it will associate those particular commits with the issue.
+	
+------------------------------------------------------------------------------------------------
+
+GitHub Gists
+
+- Simple way to Share Code
+	. Entire Files or Just a Snip
+	. "Micro" Git Repository
+		. Many Same Operations
+		. Local Access
+		
+. Creating Gists
+	. Click on Profile and go to "My Gists" -- redirecting to gist.github.com/ommoore
+		. Select "Create a Gist"
+			. Create a description: 'Java Home Environment Variable on Linux'
+			. Give a Filename: '.bashrc'
+			. Contents: (snippet of code you wish to share) 
+				'export JAVA_HOME=/path/to/java'
+			. Add additional files if necessary
+				Filename: '.bash_profile'
+				Contents: 'export JAVA_HOME=/path/to/java''
+			. Create 'Secret Gist' or 'Public Gist'
+				. Secret Gists are publically available but excluded from search engines, while Public Gists will show up in searches.
+			. Gists can be edited and interacted with like a normal repository environment.
+			. Comment:
+				## Instructions
+				Pick either the *.bashrc* file **or** the *.bash_profile* depending on your system.
+				
+. Working with Gists Locally
+	//On the main page of a specific Gist, copy the SSH link for cloning
+	//Then on a local terminal,
+	cd .. //go up to gitprojects folder
+	git clone git@gist.github.com:5c9c742f98ecb38725ba1c46e33864d6.git my-gist
+	
+	//edited .bashrc and .bash_profile locally
+	git add .bash*
+	git commit -m "Adding comments to files"
+	git push origin master
+	
+	//Now changes are reflected on GitHub with a new revision shown.
+	
+. Sharing Gists
+//Reference Gist by sharing its unique URL with users, or use a URL shortener like bitly
+
+. Deleting Gists
+//Have to delete on both GitHub and local end with rm -rf
+
+------------------------------------------------------------------------------------------------
+
+GitHub Organizations
+
+// Meant for a group of related repositories: such as a company, a department, a team, or a group of friends working on a project containing multiple repos.
+	. Group Related Repositories
+	. Often overlooked
+	. Available for everyone
+	. Teams & Permissions
+
+
+. Creating a GitHub Organization
+//+  ->   New Repo / Import Repo / New Gist / __New Organization__ / New Project
+//Created ommoore-organization-example
+
+. Forking the Organization's Repository back to My Account
+//Transferred ownership of /website/ from 'ommoore/website/' to 'ommoore-organization-example/website/'
+//Forked a copy of the repository back to 'ommoore'
+// This is how work is done in the "Pull Request Workflow" model.
+
+. Updating Remote References on the Local Side
+//cd into the website repo
+git remote -v //remote references still point to ommoore/website.git (prev copy before transferring ownership and forking)
+//go to the organization's version of this repository on GitHub and copy the SSH link
+//There are 3 distinct repos with the same name and similar histories now! (local, remote, organization)
+git remote add upstream git@github.com:ommoore-organization-example/website.git
+git remote -v  //now shows upstream (fetch) and upstream (push)
+git fetch upstream
+git fetch --all  //fetches from both origin and upstream 
+
+. Branches and Confusion
+//How to specify a branch that exists in both remote origins?
+//Created new branch 'shared' as a copy of develop (on the organization repo)
+//Also created 'shared' branch on the forked remote repo also as a copy of develop
+git branch -a    //only shows remote branches that it is aware of (isn't aware of either 'shared' branches yet because we didn't fetch yet)
+git fetch --all
+git branch -a    //now it is correctly updated
+git checkout shared    //error from git "did not match any file(s) known to git". Why?
+git checkout -b shared origin/shared     //create new local branch '-b' named shared from origin/shared and switch into new branch 'shared'
+git pull
+
